@@ -7,14 +7,15 @@
   <style>
     body { font-family: Arial, sans-serif; background: #f4f4f9; padding: 20px; color: #333; }
     .card { background: #fff; padding: 20px; border-radius: 8px; max-width: 500px; margin: auto; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
-    h2 { text-align: center; color: #d32f2f; }
+    h2 { text-align: center; color: #d32f2f; margin-bottom: 20px; }
     .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 15px; }
-    .section-title { font-weight: bold; text-align: center; background: #eee; padding: 5px; grid-column: span 2; border-radius: 4px; }
+    .section-title { font-weight: bold; text-align: center; background: #eee; padding: 6px; grid-column: span 2; border-radius: 4px; }
     label { font-size: 12px; font-weight: bold; display: block; margin-top: 5px; }
     input { width: 90%; padding: 8px; border: 1px solid #ccc; border-radius: 4px; font-size: 14px; }
     .calculated { background: #e8f5e9; font-weight: bold; }
     button { width: 100%; padding: 12px; background: #d32f2f; color: white; border: none; border-radius: 4px; font-size: 16px; cursor: pointer; font-weight: bold; margin-top: 10px; }
     button:hover { background: #b71c1c; }
+    button:disabled { background: #999; cursor: not-allowed; }
   </style>
 </head>
 <body>
@@ -60,12 +61,11 @@
     <strong>Piezas Equivalentes del Día:</strong> <span id="eq_piezas">0</span>
   </div>
 
-  <button onclick="guardarData()">GUARDAR EN BASE DE DATOS</button>
+  <button id="btnGuardar" onclick="guardarData()">GUARDAR EN BASE DE DATOS</button>
 </div>
 
 <script>
-  // PEGA AQUÍ TU URL DE GOOGLE APPS SCRIPT
-  const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzxdblky8c3JokCqzglUVT6GUOpJWyrzRMdu3YCZDXpCDZoKm5edHB8uWoabFzb3leV/exec";
+  const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzxdbIky8c3JokCqzglUVT6GUOpJWyrzRMdu3YCZDXpCDZoKm5edHB8uWoabFzb3leV/exec";
 
   document.getElementById('fecha').valueAsDate = new Date();
 
@@ -95,36 +95,39 @@
   }
 
   function guardarData() {
-    const btn = document.querySelector('button');
+    const btn = document.getElementById('btnGuardar');
     btn.disabled = true;
     btn.innerText = "Enviando a Google Sheets...";
 
-    const formData = new URLSearchParams();
-    formData.append('fecha', document.getElementById('fecha').value);
-    formData.append('pollo_anterior', document.getElementById('p_ant').value);
-    formData.append('pollo_entro', document.getElementById('p_ent').value);
-    formData.append('pollo_total', document.getElementById('p_tot').value);
-    formData.append('pollo_ventadia', document.getElementById('p_ven').value);
-    formData.append('pollo_queda', document.getElementById('p_que').value);
-    formData.append('alitas_anterior', document.getElementById('a_ant').value);
-    formData.append('alitas_entro', document.getElementById('a_ent').value);
-    formData.append('alitas_total', document.getElementById('a_tot').value);
-    formData.append('alitas_ventadia', document.getElementById('a_ven').value);
-    formData.append('alitas_queda', document.getElementById('a_que').value);
-    formData.append('piezas_equivalentes', document.getElementById('eq_piezas').innerText);
-    formData.append('lote_aceite', 'Lote 1');
+    const payload = {
+      fecha: document.getElementById('fecha').value,
+      pollo_anterior: document.getElementById('p_ant').value,
+      pollo_entro: document.getElementById('p_ent').value,
+      pollo_total: document.getElementById('p_tot').value,
+      pollo_ventadia: document.getElementById('p_ven').value,
+      pollo_queda: document.getElementById('p_que').value,
+      alitas_anterior: document.getElementById('a_ant').value,
+      alitas_entro: document.getElementById('a_ent').value,
+      alitas_total: document.getElementById('a_tot').value,
+      alitas_ventadia: document.getElementById('a_ven').value,
+      alitas_queda: document.getElementById('a_que').value,
+      piezas_equivalentes: document.getElementById('eq_piezas').innerText,
+      lote_aceite: 'Lote-001'
+    };
 
     fetch(SCRIPT_URL, {
       method: 'POST',
       mode: 'no-cors',
-      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-      body: formData.toString()
-    }).then(() => {
-      alert('¡Registro guardado con éxito en Google Sheets!');
+      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+      body: JSON.stringify(payload)
+    })
+    .then(() => {
+      alert('¡Registro enviado con éxito! Revisa tu Google Sheet.');
       btn.disabled = false;
       btn.innerText = "GUARDAR EN BASE DE DATOS";
-    }).catch(err => {
-      alert('Error de conexión.');
+    })
+    .catch(err => {
+      alert('Error de conexión: ' + err);
       btn.disabled = false;
       btn.innerText = "GUARDAR EN BASE DE DATOS";
     });
