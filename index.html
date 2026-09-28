@@ -3,209 +3,105 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Control Diario de Inventario</title>
+    <title>Inventario</title>
     <style>
-        body { font-family: 'Segoe UI', Arial, sans-serif; background-color: #f4f6f9; padding: 10px; max-width: 650px; margin: auto; color: #333; }
-        .contenedor { background: white; padding: 20px; border-radius: 8px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
-        h2 { color: #d9383a; text-align: center; margin-top: 0; font-size: 20px; text-transform: uppercase; font-weight: bold; margin-bottom: 20px; }
-        .usuario-bloque { margin-bottom: 15px; }
-        .grid-columnas { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
-        .titulo-prod { background: #555; color: white; text-align: center; padding: 6px; font-weight: bold; border-radius: 4px; font-size: 14px; text-transform: uppercase; margin-bottom: 15px; letter-spacing: 1px; }
-        .campo { margin-bottom: 12px; }
-        label { display: block; margin-bottom: 4px; font-size: 11px; font-weight: bold; color: #444; text-transform: uppercase; }
-        input { width: 100%; padding: 10px; box-sizing: border-box; border: 1px solid #ccc; border-radius: 4px; font-size: 15px; font-weight: 500; }
-        input:focus { border-color: #d9383a; outline: none; }
-        input[readonly].calculo { background-color: #e9f7ef; border-color: #a3e4d7; font-weight: bold; color: #196f3d; }
-        input[readonly].anterior { background-color: #f2f2f2; border-color: #ccc; color: #666; font-weight: bold; cursor: not-allowed; }
-        .tarjeta-informe { margin-top: 20px; background-color: #e8f8f5; border: 1px solid #a3e4d7; padding: 15px; border-radius: 6px; color: #117a65; font-size: 15px; line-height: 1.6; }
-        .tarjeta-informe.alerta-critica { background-color: #fadbd8; border-color: #f5b7b1; color: #922b21; }
-        .status-ok { text-align: center; font-size: 18px; font-weight: bold; margin-bottom: 10px; text-transform: uppercase; color: #196f3d; display: flex; align-items: center; justify-content: center; gap: 8px; }
-        .tarjeta-informe.alerta-critica .status-ok { color: #922b21; }
-        .lista-datos { list-style: none; padding: 0; margin: 0; font-weight: 600; }
-        .lista-datos li { margin-bottom: 6px; padding-left: 15px; position: relative; }
-        .lista-datos li::before { content: "•"; position: absolute; left: 0; color: inherit; }
-        .destaque { font-size: 17px; font-weight: bold; }
-        button { background-color: #d9383a; color: white; border: none; padding: 15px; width: 100%; cursor: pointer; font-size: 16px; font-weight: bold; border-radius: 4px; text-transform: uppercase; margin-top: 20px; box-shadow: 0 3px 6px rgba(0,0,0,0.1); }
-        button:hover { background-color: #bc2f31; }
-        #mensaje { margin-top: 15px; text-align: center; font-weight: bold; font-size: 13px; color: #7f8c8d; }
+        body { font-family: sans-serif; background: #f4f6f9; padding: 10px; max-width: 500px; margin: auto; }
+        .box { background: white; padding: 15px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+        h2 { color: #d9383a; text-align: center; margin: 0 0 15px 0; font-size: 18px; }
+        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+        .prod { background: #555; color: white; text-align: center; padding: 4px; font-weight: bold; border-radius: 4px; margin-bottom: 10px; font-size: 13px; }
+        .cam { margin-bottom: 8px; }
+        label { display: block; font-size: 10px; font-weight: bold; color: #444; }
+        input { width: 100%; padding: 8px; box-sizing: border-box; border: 1px solid #ccc; border-radius: 4px; font-size: 14px; }
+        input[readonly] { background: #e9f7ef; color: #196f3d; font-weight: bold; }
+        input[readonly].ant { background: #f2f2f2; color: #666; }
+        .inf { margin-top: 15px; background: #e8f8f5; border: 1px solid #a3e4d7; padding: 12px; border-radius: 6px; color: #117a65; font-weight: bold; font-size: 13px; }
+        .inf.rojo { background: #fadbd8; border-color: #f5b7b1; color: #922b21; }
+        button { background: #d9383a; color: white; border: none; padding: 12px; width: 100%; cursor: pointer; font-size: 15px; font-weight: bold; border-radius: 4px; margin-top: 15px; }
+        #msg { margin-top: 10px; text-align: center; font-size: 12px; font-weight: bold; color: #7f8c8d; }
     </style>
 </head>
 <body>
-<div class="contenedor">
+<div class="box">
     <h2>Control Diario de Inventario</h2>
-    <form id="formularioVentas">
-        <div class="campo usuario-bloque">
-            <label for="usuario">Usuario / Broastero:</label>
-            <input type="text" id="usuario" value="GUSTAVO" required>
-        </div>
-        <div class="grid-columnas">
+    <form id="fVentas">
+        <div class="cam"><label>BROASTERO:</label><input type="text" id="usu" value="GUSTAVO" required></div>
+        <div class="grid">
             <div>
-                <div class="titulo-prod" style="background-color: #d9383a;">Pollo</div>
-                <div class="campo">
-                    <label>ANTERIOR (AUTO):</label>
-                    <input type="number" id="pollo_quedo" class="anterior" readonly value="0">
-                </div>
-                <div class="campo">
-                    <label>ENTRÓ (HOY):</label>
-                    <input type="number" id="pollo_entro" placeholder="0" min="0">
-                </div>
-                <div class="campo">
-                    <label>TOTAL (AUTO):</label>
-                    <input type="number" id="pollo_total" class="calculo" readonly value="0">
-                </div>
-                <div class="campo">
-                    <label>QUEDA FINAL:</label>
-                    <input type="number" id="pollo_queda" placeholder="0" min="0" required>
-                </div>
-                <div class="campo">
-                    <label>VENTA DÍA (AUTO):</label>
-                    <input type="number" id="pollo_venta" class="calculo" readonly value="0">
-                </div>
+                <div class="prod" style="background:#d9383a;">Pollo</div>
+                <div class="cam"><label>ANT:</label><input type="number" id="pQ" class="ant" readonly value="0"></div>
+                <div class="cam"><label>ENTRÓ:</label><input type="number" id="pE" placeholder="0"></div>
+                <div class="cam"><label>TOTAL:</label><input type="number" id="pT" readonly value="0"></div>
+                <div class="cam"><label>QUEDA:</label><input type="number" id="pK" placeholder="0" required></div>
+                <div class="cam"><label>VENTA:</label><input type="number" id="pV" readonly value="0"></div>
             </div>
             <div>
-                <div class="titulo-prod" style="background-color: #f39c12;">Alitas</div>
-                <div class="campo">
-                    <label>ANTERIOR (AUTO):</label>
-                    <input type="number" id="alitas_quedo" class="anterior" readonly value="0">
-                </div>
-                <div class="campo">
-                    <label>ENTRÓ (HOY):</label>
-                    <input type="number" id="alitas_entro" placeholder="0" min="0">
-                </div>
-                <div class="campo">
-                    <label>TOTAL (AUTO):</label>
-                    <input type="number" id="alitas_total" class="calculo" readonly value="0">
-                </div>
-                <div class="campo">
-                    <label>QUEDA FINAL:</label>
-                    <input type="number" id="alitas_queda" placeholder="0" min="0" required>
-                </div>
-                <div class="campo">
-                    <label>VENTA DÍA (AUTO):</label>
-                    <input type="number" id="alitas_venta" class="calculo" readonly value="0">
-                </div>
+                <div class="prod" style="background:#f39c12;">Alitas</div>
+                <div class="cam"><label>ANT:</label><input type="number" id="aQ" class="ant" readonly value="0"></div>
+                <div class="cam"><label>ENTRÓ:</label><input type="number" id="aE" placeholder="0"></div>
+                <div class="cam"><label>TOTAL:</label><input type="number" id="aT" readonly value="0"></div>
+                <div class="cam"><label>QUEDA:</label><input type="number" id="aK" placeholder="0" required></div>
+                <div class="cam"><label>VENTA:</label><input type="number" id="aV" readonly value="0"></div>
             </div>
         </div>
-        <div id="tarjetaInforme" class="tarjeta-informe">
-            <div id="statusTexto" class="status-ok">✅ REGISTRO OK</div>
-            <ul class="lista-datos">
-                <li>Piezas equivalentes hoy: <span id="txtPiezasHoy">0</span></li>
-                <li>Nuevo Acumulado del Lote: <span id="txtAcumuladoLote" class="destaque">0</span> / 600 piezas</li>
-                <li style="margin-top: 10px; border-top: 1px dashed rgba(0,0,0,0.1); padding-top: 6px;">
-                    ℹ️ Quedan aprox. <span id="txtRestanteLote" class="destaque">600</span> piezas para la siguiente rotación.
-                </li>
-            </ul>
+        <div id="card" class="inf">
+            <div id="st" style="text-align:center;margin-bottom:5px;">✅ REGISTRO OK</div>
+            • Piezas hoy: <span id="tH">0</span><br>
+            • Acumulado Lote: <span id="tL">0</span> / 600<br>
+            • Quedan aprox: <span id="tR">600</span>
         </div>
         <button type="submit">Procesar Registro Diario</button>
     </form>
-    <div id="mensaje">Conectando con Google Sheets para traer saldos...</div>
+    <div id="msg">Cargando saldos de Google Sheets...</div>
 </div>
-
-
-
 <script>
-    const URL_GOOGLE_SCRIPT = "https://script.google.com/macros/s/AKfycbzubkEM0TF2EWtv9n81gO2kZVSP8O2_wHOU1arh3uRBrYzOPzS6o1QaR_h5pz3oaJWqAQ/exec";
-    const LIMITE_LOTE = 600; 
-    let acumuladoBaseSheets = 0; 
-
-    const pQuedo = document.getElementById('pollo_quedo'), pEntro = document.getElementById('pollo_entro'), pTotal = document.getElementById('pollo_total'), pQueda = document.getElementById('pollo_queda'), pVenta = document.getElementById('pollo_venta');
-    const aQuedo = document.getElementById('alitas_quedo'), aEntro = document.getElementById('alitas_entro'), aTotal = document.getElementById('alitas_total'), aQueda = document.getElementById('alitas_queda'), aVenta = document.getElementById('alitas_venta');
-    
-    const tarjetaInforme = document.getElementById('tarjetaInforme');
-    const statusTexto = document.getElementById('statusTexto');
-    const txtPiezasHoy = document.getElementById('txtPiezasHoy');
-    const txtAcumuladoLote = document.getElementById('txtAcumuladoLote');
-    const txtRestanteLote = document.getElementById('txtRestanteLote');
-    const mensajeDiv = document.getElementById('mensaje');
+    const URL = "https://google.com";
+    let baseLote = 0;
+    const $ = id => document.getElementById(id);
+    const n = i => (!i || i.value.trim()==="") ? 0 : (parseFloat(i.value)||0);
 
     window.addEventListener('DOMContentLoaded', () => {
-        fetch(URL_GOOGLE_SCRIPT)
-        .then(res => res.json())
-        .then(datos => {
-            pQuedo.value = datos.pollo_anterior !== undefined ? datos.pollo_anterior : 0;
-            aQuedo.value = datos.alitas_anterior !== undefined ? datos.alitas_anterior : 0;
-            acumuladoBaseSheets = datos.acumulado_historico || 0; 
-            mensajeDiv.style.color = "#27ae60";
-            mensajeDiv.textContent = "Saldos y acumulados del lote cargados correctamente.";
-            calcularFormulario();
-        })
-        .catch(err => {
-            mensajeDiv.style.color = "#e67e22";
-            mensajeDiv.textContent = "Saldos inicializados en 0. Listo para registrar.";
-            calcularFormulario();
-            console.error(err);
-        });
+        fetch(URL).then(r => r.json()).then(d => {
+            $('pQ').value = d.pollo_anterior||0; $('aQ').value = d.alitas_anterior||0;
+            baseLote = parseFloat(d.acumulado_historico)||0;
+            $('msg').style.color = "#27ae60"; $('msg').textContent = "Saldos cargados con éxito.";
+            calc();
+        }).catch(e => { $('msg').textContent = "Listo para iniciar registro diario."; calc(); });
     });
 
-    function calcularFormulario() {
-        const vPQuedo = parseFloat(pQuedo.value) === 0 ? 0 : (parseFloat(pQuedo.value) || 0);
-        const vPEntro = parseFloat(pEntro.value) === 0 ? 0 : (parseFloat(pEntro.value) || 0); 
-        const vPQueda = parseFloat(pQueda.value) === 0 ? 0 : (parseFloat(pQueda.value) || 0);
-        
-        const vPTotal = vPQuedo + vPEntro;
-        pTotal.value = vPTotal;
-        const vPVenta = vPTotal - vPQueda;
-        pVenta.value = vPVenta >= 0 ? vPVenta : 0;
+    function calc() {
+        $('pT').value = n($('pQ')) + n($('pE'));
+        $('pV').value = Math.max(0, n($('pT')) - n($('pK')));
+        $('aT').value = n($('aQ')) + n($('aE'));
+        $('aV').value = Math.max(0, n($('aT')) - n($('aK')));
 
-        const vAQuedo = parseFloat(aQuedo.value) === 0 ? 0 : (parseFloat(aQuedo.value) || 0);
-        const vAEntro = parseFloat(aEntro.value) === 0 ? 0 : (parseFloat(aEntro.value) || 0);
-        const vAQueda = parseFloat(aQueda.value) === 0 ? 0 : (parseFloat(aQueda.value) || 0);
-        
-        const vATotal = vAQuedo + vAEntro;
-        aTotal.value = vATotal;
-        const vAVenta = vATotal - vAQueda;
-        aVenta.value = vAVenta >= 0 ? vAVenta : 0;
+        const hoy = n($('pV')) + (n($('aV')) / 3);
+        const tot = baseLote + hoy;
+        const res = Math.max(0, 600 - tot);
 
-        const piezasHoy = vPVenta + (vAVenta / 3);
-        txtPiezasHoy.textContent = piezasHoy.toFixed(1);
+        $('tH').textContent = hoy.toFixed(1);
+        $('tL').textContent = tot.toFixed(1);
+        $('tR').textContent = res.toFixed(1);
 
-        const nuevoAcumulado = acumuladoBaseSheets + piezasHoy;
-        txtAcumuladoLote.textContent = nuevoAcumulado.toFixed(1);
-
-        const piezasRestantes = LIMITE_LOTE - nuevoAcumulado;
-        txtRestanteLote.textContent = piezasRestantes >= 0 ? piezasRestantes.toFixed(1) : "0.0";
-
-        if (nuevoAcumulado >= LIMITE_LOTE) {
-            tarjetaInforme.classList.add('alerta-critica');
-            statusTexto.textContent = "⚠️ REVISAR ROTACIÓN DE LOTE";
-        } else {
-            tarjetaInforme.classList.remove('alerta-critica');
-            statusTexto.textContent = "✅ REGISTRO OK";
-        }
+        if (tot >= 600) { $('card').className = 'inf rojo'; $('st').textContent = "⚠️ ROTAR LOTE"; }
+        else { $('card').className = 'inf'; $('st').textContent = "✅ REGISTRO OK"; }
     }
 
-    pEntro.addEventListener('input', calcularFormulario);
-    pQueda.addEventListener('input', calcularFormulario);
-    aEntro.addEventListener('input', calcularFormulario);
-    aQueda.addEventListener('input', calcularFormulario);
+    ['pE','pK','aE','aK'].forEach(id => $(id).addEventListener('input', calc));
 
-    document.getElementById('formularioVentas').addEventListener('submit', function(e) {
+    $('fVentas').addEventListener('submit', e => {
         e.preventDefault();
-        mensajeDiv.style.color = "#2980b9";
-        mensajeDiv.textContent = "Procesando y guardando registro diario...";
-
-        const datosEnvio = {
-            usuario: document.getElementById('usuario').value,
-            pollo_quedo: pQuedo.value, pollo_entro: pEntro.value || 0, pollo_total: pTotal.value, pollo_venta: pVenta.value, pollo_queda: pQueda.value,
-            alitas_quedo: aQuedo.value, alitas_entro: aEntro.value || 0, alitas_total: aTotal.value, alitas_venta: aVenta.value, alitas_queda: aQueda.value
-        };
-
-        fetch(URL_GOOGLE_SCRIPT, {
-            method: 'POST',
-            mode: 'no-cors',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(datosEnvio)
-        })
-        .then(() => {
-            mensajeDiv.style.color = "#27ae60";
-            mensajeDiv.textContent = "¡Registro guardado con éxito! Actualizando la página...";
-            setTimeout(() => { location.reload(); }, 1200);
-        })
-        .catch(error => {
-            mensajeDiv.style.color = "#c0392b";
-            mensajeDiv.textContent = "Error al intentar guardar el registro.";
-            console.error(error);
-        });
+        $('msg').style.color = "#2980b9"; $('msg').textContent = "Guardando reporte...";
+        fetch(URL, {
+            method: 'POST', mode: 'no-cors', headers: {'Content-Type':'application/json'},
+            body: JSON.stringify({
+                usuario: $('usu').value, pollo_quedo: n($('pQ')), pollo_entro: n($('pE')), pollo_total: n($('pT')), pollo_venta: n($('pV')), pollo_queda: n($('pK')),
+                alitas_quedo: n($('aQ')), alitas_entro: n($('aE')), alitas_total: n($('aT')), alitas_venta: n($('aV')), alitas_queda: n($('aK'))
+            })
+        }).then(() => {
+            $('msg').style.color = "#27ae60"; $('msg').textContent = "¡Guardado! Recargando...";
+            setTimeout(() => location.reload(), 1200);
+        }).catch(err => { $('msg').style.color = "#c0392b"; $('msg').textContent = "Error al guardar."; });
     });
 </script>
 </body>
