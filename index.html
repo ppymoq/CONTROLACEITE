@@ -1,148 +1,74 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Reporte de Ventas Diarias y Control de Aceite</title>
-  <style>
-    body { font-family: Arial, sans-serif; background: #f4f4f9; padding: 20px; color: #333; }
-    .card { background: #fff; padding: 20px; border-radius: 8px; max-width: 500px; margin: auto; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
-    h2 { text-align: center; color: #d32f2f; margin-bottom: 20px; }
-    .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 15px; }
-    .section-title { font-weight: bold; text-align: center; background: #eee; padding: 6px; grid-column: span 2; border-radius: 4px; }
-    label { font-size: 12px; font-weight: bold; display: block; margin-top: 5px; }
-    input { width: 90%; padding: 8px; border: 1px solid #ccc; border-radius: 4px; font-size: 14px; }
-    .calculated { background: #e8f5e9; font-weight: bold; }
-    button { width: 100%; padding: 12px; background: #d32f2f; color: white; border: none; border-radius: 4px; font-size: 16px; cursor: pointer; font-weight: bold; margin-top: 10px; }
-    button:hover { background: #b71c1c; }
-    button:disabled { background: #999; cursor: not-allowed; }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Control de Aceite</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; max-width: 400px; margin: auto; }
+        .campo { margin-bottom: 15px; }
+        label { display: block; margin-bottom: 5px; font-weight: bold; }
+        input { width: 100%; padding: 8px; box-sizing: border-box; }
+        button { background-color: #28a745; color: white; border: none; padding: 10px; width: 100%; cursor: pointer; font-size: 16px; }
+        button:hover { background-color: #218838; }
+        #mensaje { margin-top: 15px; text-align: center; font-weight: bold; }
+    </style>
 </head>
 <body>
 
-<div class="card">
-  <h2>REPORTE DE VENTAS DIARIAS</h2>
-  
-  <label>FECHA:</label>
-  <input type="date" id="fecha" style="width: 96%; margin-bottom: 15px;">
-
-  <div class="grid">
-    <div class="section-title">[ POLLO ]</div>
-    <div class="section-title">[ ALITAS ]</div>
-
-    <div>
-      <label>ANTERIOR:</label>
-      <input type="number" id="p_ant" value="23" oninput="calcular()">
-      <label>ENTRÓ:</label>
-      <input type="number" id="p_ent" value="80" oninput="calcular()">
-      <label>TOTAL:</label>
-      <input type="number" id="p_tot" class="calculated" readonly>
-      <label>QUEDA:</label>
-      <input type="number" id="p_que" value="37" oninput="calcular()">
-      <label>VENTA DÍA:</label>
-      <input type="number" id="p_ven" class="calculated" readonly>
-    </div>
-
-    <div>
-      <label>ANTERIOR:</label>
-      <input type="number" id="a_ant" value="100" oninput="calcular()">
-      <label>ENTRÓ:</label>
-      <input type="number" id="a_ent" value="98" oninput="calcular()">
-      <label>TOTAL:</label>
-      <input type="number" id="a_tot" class="calculated" readonly>
-      <label>QUEDA:</label>
-      <input type="number" id="a_que" value="93" oninput="calcular()">
-      <label>VENTA DÍA:</label>
-      <input type="number" id="a_ven" class="calculated" readonly>
-    </div>
-  </div>
-
-  <div style="background: #fff3e0; padding: 10px; border-radius: 4px; text-align: center; margin-bottom: 15px;">
-    <strong>Piezas Equivalentes del Día:</strong> <span id="eq_piezas">0</span>
-  </div>
-
-  <button id="btnGuardar" onclick="guardarData()">GUARDAR EN BASE DE DATOS</button>
-</div>
-
-<script>
-  const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbz30VDZ54ZZBN7PLwS5REvbD-pO7QUnjfrHBPpLFMGgv3v7dVGfB5kNqKG356kNPpOd/exec";
-
-  document.getElementById('fecha').valueAsDate = new Date();
-
-  function calcular() {
-    let p_ant = Number(document.getElementById('p_ant').value) || 0;
-    let p_ent = Number(document.getElementById('p_ent').value) || 0;
-    let p_que = Number(document.getElementById('p_que').value) || 0;
+    <h2>Registro de Control de Aceite</h2>
     
-    let p_tot = p_ant + p_ent;
-    let p_ven = p_tot - p_que;
-    
-    document.getElementById('p_tot').value = p_tot;
-    document.getElementById('p_ven').value = p_ven;
+    <form id="formularioAceite">
+        <div class="campo">
+            <label for="nombre">Nombre / Operario:</label>
+            <input type="text" id="nombre" required>
+        </div>
+        <div class="campo">
+            <label for="valor">Cantidad de Aceite (Litros/Valor):</label>
+            <input type="number" id="valor" step="0.01" required>
+        </div>
+        <button type="submit">Guardar en Google Sheets</button>
+    </form>
 
-    let a_ant = Number(document.getElementById('a_ant').value) || 0;
-    let a_ent = Number(document.getElementById('a_ent').value) || 0;
-    let a_que = Number(document.getElementById('a_que').value) || 0;
+    <div id="mensaje"></div>
 
-    let a_tot = a_ant + a_ent;
-    let a_ven = a_tot - a_que;
+    <script>
+        // REMPLAZA ESTA URL CON LA QUE TE DIO GOOGLE APPS SCRIPT
+        const URL_GOOGLE_SCRIPT = "https://script.google.com/macros/s/AKfycbzubkEM0TF2EWtv9n81gO2kZVSP8O2_wHOU1arh3uRBrYzOPzS6o1QaR_h5pz3oaJWqAQ/exec";
 
-    document.getElementById('a_tot').value = a_tot;
-    document.getElementById('a_ven').value = a_ven;
+        document.getElementById('formularioAceite').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const mensajeDiv = document.getElementById('mensaje');
+            mensajeDiv.style.color = "blue";
+            mensajeDiv.textContent = "Enviando datos...";
 
-    let eq = p_ven + (a_ven / 3);
-    document.getElementById('eq_piezas').innerText = Math.round(eq);
-  }
+            const datos = {
+                nombre: document.getElementById('nombre').value,
+                valor: document.getElementById('valor').value
+            };
 
-  
-  function guardarData() {
-    const btn = document.getElementById('btnGuardar');
-    btn.disabled = true;
-    btn.innerText = "Enviando a Google Sheets...";
-  
-    // 1. Creamos un objeto JSON limpio con los nombres idénticos que espera tu script
-    const dataPayload = {
-      fecha: document.getElementById('fecha').value,
-      pollo_anterior: document.getElementById('p_ant').value,
-      pollo_entro: document.getElementById('p_ent').value,
-      pollo_total: document.getElementById('p_tot').value,
-      pollo_ventadia: document.getElementById('p_ven').value,
-      pollo_queda: document.getElementById('p_que').value,
-      alitas_anterior: document.getElementById('a_ant').value,
-      alitas_entro: document.getElementById('a_ent').value,
-      alitas_total: document.getElementById('a_tot').value,
-      alitas_ventadia: document.getElementById('a_ven').value,
-      alitas_queda: document.getElementById('a_que').value,
-      piezas_equivalentes: document.getElementById('eq_piezas').innerText,
-      lote_aceite: 'Lote-001'
-    };
-  
-    // 2. Lo enviamos usando el modo 'cors' (o mantén 'no-cors' si usas redirecciones) y enviando el JSON como texto plano
-    fetch(SCRIPT_URL, {
-      method: 'POST',
-      mode: 'no-cors', // Mantenemos tu configuración de red original
-      headers: { 'Content-Type': 'text/plain' }, 
-      body: JSON.stringify(dataPayload) // <-- Convertimos el objeto a texto JSON
-    })
-    .then(() => {
-      alert('¡Registro enviado con éxito! Revisa tu Google Sheet.');
-      btn.disabled = false;
-      btn.innerText = "GUARDAR EN BASE DE DATOS";
-    })
-    .catch(err => {
-      alert('Error de conexión: ' + err);
-      btn.disabled = false;
-      btn.innerText = "GUARDAR EN BASE DE DATOS";
-    });
-  }
-
-  
-
-    
- 
-
-  calcular();
-</script>
+            // Enviamos los datos mediante POST usando fetch
+            fetch(URL_GOOGLE_SCRIPT, {
+                method: 'POST',
+                mode: 'no-cors', // Evita problemas de CORS al enviar a Google
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(datos)
+            })
+            .then(() => {
+                mensajeDiv.style.color = "green";
+                mensajeDiv.textContent = "¡Datos guardados con éxito!";
+                document.getElementById('formularioAceite').reset();
+            })
+            .catch(error => {
+                mensajeDiv.style.color = "red";
+                mensajeDiv.textContent = "Error al guardar los datos.";
+                console.error('Error:', error);
+            });
+        });
+    </script>
 
 </body>
 </html>
