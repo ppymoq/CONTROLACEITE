@@ -64,8 +64,8 @@
 </div>
 
 <script>
-  // Reemplaza esta URL con la URL de tu Google Apps Script
-  const SCRIPT_URL = "TU_URL_DE_APPS_SCRIPT_AQUI";
+  // PEGA AQUÍ TU URL DE GOOGLE APPS SCRIPT
+  const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzxdblky8c3JokCqzglUVT6GUOpJWyrzRMdu3YCZDXpCDZoKm5edHB8uWoabFzb3leV/exec";
 
   document.getElementById('fecha').valueAsDate = new Date();
 
@@ -95,28 +95,39 @@
   }
 
   function guardarData() {
-    const payload = {
-      action: 'guardar_registro',
-      fecha: document.getElementById('fecha').value,
-      pollo_anterior: Number(document.getElementById('p_ant').value),
-      pollo_entro: Number(document.getElementById('p_ent').value),
-      pollo_total: Number(document.getElementById('p_tot').value),
-      pollo_ventadia: Number(document.getElementById('p_ven').value),
-      pollo_queda: Number(document.getElementById('p_que').value),
-      alitas_anterior: Number(document.getElementById('a_ant').value),
-      alitas_entro: Number(document.getElementById('a_ent').value),
-      alitas_total: Number(document.getElementById('a_tot').value),
-      alitas_ventadia: Number(document.getElementById('a_ven').value),
-      alitas_queda: Number(document.getElementById('a_que').value),
-      piezas_equivalentes: Number(document.getElementById('eq_piezas').innerText),
-      lote_aceite: "Lote 1"
-    };
+    const btn = document.querySelector('button');
+    btn.disabled = true;
+    btn.innerText = "Enviando a Google Sheets...";
+
+    const formData = new URLSearchParams();
+    formData.append('fecha', document.getElementById('fecha').value);
+    formData.append('pollo_anterior', document.getElementById('p_ant').value);
+    formData.append('pollo_entro', document.getElementById('p_ent').value);
+    formData.append('pollo_total', document.getElementById('p_tot').value);
+    formData.append('pollo_ventadia', document.getElementById('p_ven').value);
+    formData.append('pollo_queda', document.getElementById('p_que').value);
+    formData.append('alitas_anterior', document.getElementById('a_ant').value);
+    formData.append('alitas_entro', document.getElementById('a_ent').value);
+    formData.append('alitas_total', document.getElementById('a_tot').value);
+    formData.append('alitas_ventadia', document.getElementById('a_ven').value);
+    formData.append('alitas_queda', document.getElementById('a_que').value);
+    formData.append('piezas_equivalentes', document.getElementById('eq_piezas').innerText);
+    formData.append('lote_aceite', 'Lote 1');
 
     fetch(SCRIPT_URL, {
       method: 'POST',
-      body: JSON.stringify(payload)
-    }).then(res => alert('¡Registro guardado correctamente en la Base de Datos!'))
-      .catch(err => alert('Error al guardar datos.'));
+      mode: 'no-cors',
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      body: formData.toString()
+    }).then(() => {
+      alert('¡Registro guardado con éxito en Google Sheets!');
+      btn.disabled = false;
+      btn.innerText = "GUARDAR EN BASE DE DATOS";
+    }).catch(err => {
+      alert('Error de conexión.');
+      btn.disabled = false;
+      btn.innerText = "GUARDAR EN BASE DE DATOS";
+    });
   }
 
   calcular();
