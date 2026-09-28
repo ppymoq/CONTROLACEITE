@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Reporte de Ventas de Pollo</title>
+    <title>Control Diario de Inventario</title>
     <style>
         body { font-family: 'Segoe UI', Arial, sans-serif; background-color: #f4f6f9; padding: 10px; max-width: 650px; margin: auto; color: #333; }
         .contenedor { background: white; padding: 20px; border-radius: 8px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
@@ -21,14 +21,19 @@
         input[readonly].calculo { background-color: #e9f7ef; border-color: #a3e4d7; font-weight: bold; color: #196f3d; }
         input[readonly].anterior { background-color: #f2f2f2; border-color: #ccc; color: #666; font-weight: bold; cursor: not-allowed; }
         
-        .barra-equivalentes { margin-top: 20px; background-color: #ffe6cc; border: 1px solid #ffb366; padding: 14px; border-radius: 4px; text-align: center; font-weight: bold; font-size: 16px; color: #d35400; transition: background 0.3s, color 0.3s; }
-        .barra-equivalentes.limite-alcanzado { background-color: #c0392b !important; border-color: #922b21 !important; color: white !important; animation: pulso 1.5s infinite; }
-        
-        button { background-color: #d9383a; color: white; border: none; padding: 14px; width: 100%; cursor: pointer; font-size: 16px; font-weight: bold; border-radius: 4px; text-transform: uppercase; margin-top: 20px; box-shadow: 0 3px 6px rgba(0,0,0,0.1); }
+        /* DISEÑO DE LA NUEVA BARRA INFORMATIVA TIPO INTERFAZ 2 */
+        .tarjeta-informe { margin-top: 20px; background-color: #e8f8f5; border: 1px solid #a3e4d7; padding: 15px; border-radius: 6px; color: #117a65; font-size: 15px; line-height: 1.6; }
+        .tarjeta-informe.alerta-critica { background-color: #fadbd8; border-color: #f5b7b1; color: #922b21; }
+        .status-ok { text-align: center; font-size: 18px; font-weight: bold; margin-bottom: 10px; text-transform: uppercase; color: #196f3d; display: flex; align-items: center; justify-content: center; gap: 8px; }
+        .tarjeta-informe.alerta-critica .status-ok { color: #922b21; }
+        .lista-datos { list-style: none; padding: 0; margin: 0; font-weight: 600; }
+        .lista-datos li { margin-bottom: 6px; padding-left: 15px; position: relative; }
+        .lista-datos li::before { content: "•"; position: absolute; left: 0; color: inherit; }
+        .destaque { font-size: 17px; font-weight: bold; }
+
+        button { background-color: #d9383a; color: white; border: none; padding: 15px; width: 100%; cursor: pointer; font-size: 16px; font-weight: bold; border-radius: 4px; text-transform: uppercase; margin-top: 20px; box-shadow: 0 3px 6px rgba(0,0,0,0.1); }
         button:hover { background-color: #bc2f31; }
         #mensaje { margin-top: 15px; text-align: center; font-weight: bold; font-size: 13px; color: #7f8c8d; }
-        
-        @keyframes pulso { 0% { opacity: 1; } 50% { opacity: 0.85; } 100% { opacity: 1; } }
     </style>
 </head>
 <body>
@@ -51,15 +56,16 @@
                     <input type="number" id="pollo_quedo" class="anterior" readonly value="0">
                 </div>
                 <div class="campo">
-                    <label>ENTRÓ:</label>
-                    <input type="number" id="pollo_entro" placeholder="0" required>
+                    <!-- SE QUITA EL REQUIRED PARA PERMITIR DÍAS EN 0 SIN ERRORES -->
+                    <label>ENTRÓ (HOY):</label>
+                    <input type="number" id="pollo_entro" placeholder="0">
                 </div>
                 <div class="campo">
                     <label>TOTAL (AUTO):</label>
                     <input type="number" id="pollo_total" class="calculo" readonly value="0">
                 </div>
                 <div class="campo">
-                    <label>QUEDA:</label>
+                    <label>QUEDA FINAL:</label>
                     <input type="number" id="pollo_queda" placeholder="0" required>
                 </div>
                 <div class="campo">
@@ -76,15 +82,16 @@
                     <input type="number" id="alitas_quedo" class="anterior" readonly value="0">
                 </div>
                 <div class="campo">
-                    <label>ENTRÓ:</label>
-                    <input type="number" id="alitas_entro" placeholder="0" required>
+                    <!-- SE QUITA EL REQUIRED PARA PERMITIR DÍAS EN 0 SIN ERRORES -->
+                    <label>ENTRÓ (HOY):</label>
+                    <input type="number" id="alitas_entro" placeholder="0">
                 </div>
                 <div class="campo">
                     <label>TOTAL (AUTO):</label>
                     <input type="number" id="alitas_total" class="calculo" readonly value="0">
                 </div>
                 <div class="campo">
-                    <label>QUEDA:</label>
+                    <label>QUEDA FINAL:</label>
                     <input type="number" id="alitas_queda" placeholder="0" required>
                 </div>
                 <div class="campo">
@@ -94,45 +101,64 @@
             </div>
         </div>
 
-        <div id="barraPiezas" class="barra-equivalentes">
-            Piezas Equivalentes del Día: <span id="txtPiezas">0.00</span>
+        <!-- NUEVA TARJETA DE REPORTE BASADA EN TU IMAGEN -->
+        <div id="tarjetaInforme" class="tarjeta-informe">
+            <div class="status-ok">✅ REGISTRO OK</div>
+            <ul class="lista-datos">
+                <li>Piezas equivalentes hoy: <span id="txtPiezasHoy">0</span></li>
+                <li>Nuevo Acumulado del Lote: <span id="txtAcumuladoLote" class="destaque">0</span> / 600 piezas</li>
+                <li style="margin-top: 10px; border-top: 1px dashed rgba(0,0,0,0.1); padding-top: 6px;">
+                    ℹ️ Quedan aprox. <span id="txtRestanteLote" class="destaque">600</span> piezas para la siguiente rotación.
+                </li>
+            </ul>
         </div>
 
-        <button type="submit">Guardar Registro Diario</button>
+        <button type="submit">Procesar Registro Diario</button>
     </form>
 
     <div id="mensaje">Conectando con Google Sheets para traer saldos...</div>
 </div>
 
 <script>
-    const URL_GOOGLE_SCRIPT = "https://script.google.com/macros/s/AKfycbzubkEM0TF2EWtv9n81gO2kZVSP8O2_wHOU1arh3uRBrYzOPzS6o1QaR_h5pz3oaJWqAQ/exec";
+    const URL_GOOGLE_SCRIPT = "https://google.com";
+    const LIMITE_LOTE = 600; // Puedes cambiarlo a 500 o 600 según tu lote meta
+    let acumuladoBaseSheets = 0; // Se cargará dinámicamente desde la hoja de cálculo
 
     const pQuedo = document.getElementById('pollo_quedo'), pEntro = document.getElementById('pollo_entro'), pTotal = document.getElementById('pollo_total'), pQueda = document.getElementById('pollo_queda'), pVenta = document.getElementById('pollo_venta');
     const aQuedo = document.getElementById('alitas_quedo'), aEntro = document.getElementById('alitas_entro'), aTotal = document.getElementById('alitas_total'), aQueda = document.getElementById('alitas_queda'), aVenta = document.getElementById('alitas_venta');
-    const barraPiezas = document.getElementById('barraPiezas'), txtPiezas = document.getElementById('txtPiezas'), mensajeDiv = document.getElementById('mensaje');
+    
+    // Elementos de la nueva tarjeta de informe
+    const tarjetaInforme = document.getElementById('tarjetaInforme');
+    const txtPiezasHoy = document.getElementById('txtPiezasHoy');
+    const txtAcumuladoLote = document.getElementById('txtAcumuladoLote');
+    const txtRestanteLote = document.getElementById('txtRestanteLote');
+    const mensajeDiv = document.getElementById('mensaje');
 
-    // 1. CARGA AUTOMÁTICA DEL CIERRE ANTERIOR AL ABRIR LA APP
+    // 1. CARGAR DATOS HISTÓRICOS Y INVENTARIOS INICIALES
     window.addEventListener('DOMContentLoaded', () => {
         fetch(URL_GOOGLE_SCRIPT)
         .then(res => res.json())
-        .then(datosAyer => {
-            pQuedo.value = datosAyer.pollo_anterior;
-            aQuedo.value = datosAyer.alitas_anterior;
+        .then(datos => {
+            pQuedo.value = datos.pollo_anterior;
+            aQuedo.value = datos.alitas_anterior;
+            acumuladoBaseSheets = datos.acumulado_historico; // Guardamos lo que ya se vendió los días anteriores
+            
             mensajeDiv.style.color = "#27ae60";
-            mensajeDiv.textContent = "Saldos del cierre anterior cargados.";
+            mensajeDiv.textContent = "Saldos y acumulados del lote cargados correctamente.";
             calcularFormulario();
         })
         .catch(err => {
             mensajeDiv.style.color = "#e67e22";
-            mensajeDiv.textContent = "Saldos en 0 (Si es tu primera vez, registra datos).";
+            mensajeDiv.textContent = "Iniciando base de datos desde cero.";
             console.error(err);
         });
     });
 
-    // 2. CÁCULOS MATEMÁTICOS CORREGIDOS
+    // 2. CÁLCULO DINÁMICO EN TIEMPO REAL
     function calcularFormulario() {
+        // Pollo (Si ENTRÓ está vacío, se evalúa como 0 automáticamente)
         const vPQuedo = parseFloat(pQuedo.value) || 0;
-        const vPEntro = parseFloat(pEntro.value) || 0;
+        const vPEntro = parseFloat(pEntro.value) || 0; 
         const vPQueda = parseFloat(pQueda.value) || 0;
         
         const vPTotal = vPQuedo + vPEntro;
@@ -140,8 +166,9 @@
         const vPVenta = vPTotal - vPQueda;
         pVenta.value = vPVenta >= 0 ? vPVenta : 0;
 
+        // Alitas (Si ENTRÓ está vacío, se evalúa como 0 automáticamente)
         const vAQuedo = parseFloat(aQuedo.value) || 0;
-        const vAEntro = parseFloat(aEntro.value) || 0; // CORREGIDO AQUÍ
+        const vAEntro = parseFloat(aEntro.value) || 0;
         const vAQueda = parseFloat(aQueda.value) || 0;
         
         const vATotal = vAQuedo + vAEntro;
@@ -149,51 +176,8 @@
         const vAVenta = vATotal - vAQueda;
         aVenta.value = vAVenta >= 0 ? vAVenta : 0;
 
-        const piezasEquivalentes = vPVenta + (vAVenta / 3);
-        txtPiezas.textContent = piezasEquivalentes.toFixed(2);
+        // CÁLCULOS DE PIEZAS EQUIVALENTES DE HOY
+        const piezasHoy = vPVenta + (vAVenta / 3);
+        txtPiezasHoy.textContent = piezasHoy.toFixed(1);
 
-        if(piezasEquivalentes >= 600) {
-            barraPiezas.classList.add('limite-alcanzado');
-        } else {
-            barraPiezas.classList.remove('limite-alcanzado'); // CORREGIDO AQUÍ
-        }
-    }
-
-    [pEntro, pQueda, aEntro, aQueda].forEach(input => {
-        input.addEventListener('input', calcularFormulario);
-    });
-
-    // 3. ENVÍO DE DATOS A GOOGLE SHEETS
-    document.getElementById('formularioVentas').addEventListener('submit', function(e) {
-        e.preventDefault();
-        mensajeDiv.style.color = "#2980b9";
-        mensajeDiv.textContent = "Guardando reporte en la base de datos...";
-
-        const datosEnvio = {
-            usuario: document.getElementById('usuario').value,
-            pollo_quedo: pQuedo.value, pollo_entro: pEntro.value, pollo_total: pTotal.value, pollo_venta: pVenta.value, pollo_queda: pQueda.value,
-            alitas_quedo: aQuedo.value, alitas_entro: aEntro.value, alitas_total: aTotal.value, alitas_venta: aVenta.value, alitas_queda: aQueda.value
-        };
-
-        fetch(URL_GOOGLE_SCRIPT, {
-            method: 'POST',
-            mode: 'no-cors',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(datosEnvio)
-        })
-        .then(() => {
-            mensajeDiv.style.color = "#27ae60";
-            mensajeDiv.textContent = "¡Registrado correctamente! Actualizando interfaz...";
-            setTimeout(() => { location.reload(); }, 1200);
-        })
-        .catch(error => {
-            mensajeDiv.style.color = "#c0392b";
-            mensajeDiv.textContent = "Error al intentar guardar.";
-            console.error(error);
-        });
-    });
-</script>
-
-</body>
-</html>
-
+        // NUEVO ACUMULADO DEL LOTE (Lo de días anteriores + lo de hoy)
