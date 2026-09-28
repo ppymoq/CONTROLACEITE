@@ -94,33 +94,35 @@
     document.getElementById('eq_piezas').innerText = Math.round(eq);
   }
 
+  
   function guardarData() {
- 
     const btn = document.getElementById('btnGuardar');
     btn.disabled = true;
     btn.innerText = "Enviando a Google Sheets...";
-
-    // Preparar los datos en formato de formulario estándar
-    const params = new URLSearchParams();
-    params.append('fecha', document.getElementById('fecha').value);
-    params.append('pollo_anterior', document.getElementById('p_ant').value);
-    params.append('pollo_entro', document.getElementById('p_ent').value);
-    params.append('pollo_total', document.getElementById('p_tot').value);
-    params.append('pollo_ventadia', document.getElementById('p_ven').value);
-    params.append('pollo_queda', document.getElementById('p_que').value);
-    params.append('alitas_anterior', document.getElementById('a_ant').value);
-    params.append('alitas_entro', document.getElementById('a_ent').value);
-    params.append('alitas_total', document.getElementById('a_tot').value);
-    params.append('alitas_ventadia', document.getElementById('a_ven').value);
-    params.append('alitas_queda', document.getElementById('a_que').value);
-    params.append('piezas_equivalentes', document.getElementById('eq_piezas').innerText);
-    params.append('lote_aceite', 'Lote-001');
-
+  
+    // 1. Creamos un objeto JSON limpio con los nombres idénticos que espera tu script
+    const dataPayload = {
+      fecha: document.getElementById('fecha').value,
+      pollo_anterior: document.getElementById('p_ant').value,
+      pollo_entro: document.getElementById('p_ent').value,
+      pollo_total: document.getElementById('p_tot').value,
+      pollo_ventadia: document.getElementById('p_ven').value,
+      pollo_queda: document.getElementById('p_que').value,
+      alitas_anterior: document.getElementById('a_ant').value,
+      alitas_entro: document.getElementById('a_ent').value,
+      alitas_total: document.getElementById('a_tot').value,
+      alitas_ventadia: document.getElementById('a_ven').value,
+      alitas_queda: document.getElementById('a_que').value,
+      piezas_equivalentes: document.getElementById('eq_piezas').innerText,
+      lote_aceite: 'Lote-001'
+    };
+  
+    // 2. Lo enviamos usando el modo 'cors' (o mantén 'no-cors' si usas redirecciones) y enviando el JSON como texto plano
     fetch(SCRIPT_URL, {
       method: 'POST',
-      mode: 'no-cors',
-      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-      body: params.toString()
+      mode: 'no-cors', // Mantenemos tu configuración de red original
+      headers: { 'Content-Type': 'text/plain' }, 
+      body: JSON.stringify(dataPayload) // <-- Convertimos el objeto a texto JSON
     })
     .then(() => {
       alert('¡Registro enviado con éxito! Revisa tu Google Sheet.');
@@ -133,6 +135,8 @@
       btn.innerText = "GUARDAR EN BASE DE DATOS";
     });
   }
+
+  
 
     
  
