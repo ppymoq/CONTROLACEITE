@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Reporte de Ventas Diarias y Control de Aceite</title>
+  <style>
+    body { font-family: Arial, sans-serif; background: #f4f4f9; padding: 20px; color: #333; }
+    .card { background: #fff; padding: 20px; border-radius: 8px; max-width: 500px; margin: auto; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+    h2 { text-align: center; color: #d32f2f; }
+    .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 15px; }
+    .section-title { font-weight: bold; text-align: center; background: #eee; padding: 5px; grid-column: span 2; border-radius: 4px; }
+    label { font-size: 12px; font-weight: bold; display: block; margin-top: 5px; }
+    input { width: 90%; padding: 8px; border: 1px solid #ccc; border-radius: 4px; font-size: 14px; }
+    .calculated { background: #e8f5e9; font-weight: bold; }
+    button { width: 100%; padding: 12px; background: #d32f2f; color: white; border: none; border-radius: 4px; font-size: 16px; cursor: pointer; font-weight: bold; margin-top: 10px; }
+    button:hover { background: #b71c1c; }
+  </style>
+</head>
+<body>
+
+<div class="card">
+  <h2>REPORTE DE VENTAS DIARIAS</h2>
+  
+  <label>FECHA:</label>
+  <input type="date" id="fecha" style="width: 96%; margin-bottom: 15px;">
+
+  <div class="grid">
+    <div class="section-title">[ POLLO ]</div>
+    <div class="section-title">[ ALITAS ]</div>
+
+    <div>
+      <label>ANTERIOR:</label>
+      <input type="number" id="p_ant" value="23" oninput="calcular()">
+      <label>ENTRÓ:</label>
+      <input type="number" id="p_ent" value="80" oninput="calcular()">
+      <label>TOTAL:</label>
+      <input type="number" id="p_tot" class="calculated" readonly>
+      <label>QUEDA:</label>
+      <input type="number" id="p_que" value="37" oninput="calcular()">
+      <label>VENTA DÍA:</label>
+      <input type="number" id="p_ven" class="calculated" readonly>
+    </div>
+
+    <div>
+      <label>ANTERIOR:</label>
+      <input type="number" id="a_ant" value="100" oninput="calcular()">
+      <label>ENTRÓ:</label>
+      <input type="number" id="a_ent" value="98" oninput="calcular()">
+      <label>TOTAL:</label>
+      <input type="number" id="a_tot" class="calculated" readonly>
+      <label>QUEDA:</label>
+      <input type="number" id="a_que" value="93" oninput="calcular()">
+      <label>VENTA DÍA:</label>
+      <input type="number" id="a_ven" class="calculated" readonly>
+    </div>
+  </div>
+
+  <div style="background: #fff3e0; padding: 10px; border-radius: 4px; text-align: center; margin-bottom: 15px;">
+    <strong>Piezas Equivalentes del Día:</strong> <span id="eq_piezas">0</span>
+  </div>
+
+  <button onclick="guardarData()">GUARDAR EN BASE DE DATOS</button>
+</div>
+
+<script>
+  // Reemplaza esta URL con la URL de tu Google Apps Script
+  const SCRIPT_URL = "TU_URL_DE_APPS_SCRIPT_AQUI";
+
+  document.getElementById('fecha').valueAsDate = new Date();
+
+  function calcular() {
+    let p_ant = Number(document.getElementById('p_ant').value) || 0;
+    let p_ent = Number(document.getElementById('p_ent').value) || 0;
+    let p_que = Number(document.getElementById('p_que').value) || 0;
+    
+    let p_tot = p_ant + p_ent;
+    let p_ven = p_tot - p_que;
+    
+    document.getElementById('p_tot').value = p_tot;
+    document.getElementById('p_ven').value = p_ven;
+
+    let a_ant = Number(document.getElementById('a_ant').value) || 0;
+    let a_ent = Number(document.getElementById('a_ent').value) || 0;
+    let a_que = Number(document.getElementById('a_que').value) || 0;
+
+    let a_tot = a_ant + a_ent;
+    let a_ven = a_tot - a_que;
+
+    document.getElementById('a_tot').value = a_tot;
+    document.getElementById('a_ven').value = a_ven;
+
+    let eq = p_ven + (a_ven / 3);
+    document.getElementById('eq_piezas').innerText = Math.round(eq);
+  }
+
+  function guardarData() {
+    const payload = {
+      action: 'guardar_registro',
+      fecha: document.getElementById('fecha').value,
+      pollo_anterior: Number(document.getElementById('p_ant').value),
+      pollo_entro: Number(document.getElementById('p_ent').value),
+      pollo_total: Number(document.getElementById('p_tot').value),
+      pollo_ventadia: Number(document.getElementById('p_ven').value),
+      pollo_queda: Number(document.getElementById('p_que').value),
+      alitas_anterior: Number(document.getElementById('a_ant').value),
+      alitas_entro: Number(document.getElementById('a_ent').value),
+      alitas_total: Number(document.getElementById('a_tot').value),
+      alitas_ventadia: Number(document.getElementById('a_ven').value),
+      alitas_queda: Number(document.getElementById('a_que').value),
+      piezas_equivalentes: Number(document.getElementById('eq_piezas').innerText),
+      lote_aceite: "Lote 1"
+    };
+
+    fetch(SCRIPT_URL, {
+      method: 'POST',
+      body: JSON.stringify(payload)
+    }).then(res => alert('¡Registro guardado correctamente en la Base de Datos!'))
+      .catch(err => alert('Error al guardar datos.'));
+  }
+
+  calcular();
+</script>
+
+</body>
+</html>
