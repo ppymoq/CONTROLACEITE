@@ -47,7 +47,7 @@
                 </div>
                 <div class="campo">
                     <label>ENTRÓ (HOY):</label>
-                    <input type="number" id="pollo_entro" placeholder="0">
+                    <input type="number" id="pollo_entro" placeholder="0" min="0">
                 </div>
                 <div class="campo">
                     <label>TOTAL (AUTO):</label>
@@ -55,7 +55,7 @@
                 </div>
                 <div class="campo">
                     <label>QUEDA FINAL:</label>
-                    <input type="number" id="pollo_queda" placeholder="0" required>
+                    <input type="number" id="pollo_queda" placeholder="0" min="0" required>
                 </div>
                 <div class="campo">
                     <label>VENTA DÍA (AUTO):</label>
@@ -70,7 +70,7 @@
                 </div>
                 <div class="campo">
                     <label>ENTRÓ (HOY):</label>
-                    <input type="number" id="alitas_entro" placeholder="0">
+                    <input type="number" id="alitas_entro" placeholder="0" min="0">
                 </div>
                 <div class="campo">
                     <label>TOTAL (AUTO):</label>
@@ -78,7 +78,7 @@
                 </div>
                 <div class="campo">
                     <label>QUEDA FINAL:</label>
-                    <input type="number" id="alitas_queda" placeholder="0" required>
+                    <input type="number" id="alitas_queda" placeholder="0" min="0" required>
                 </div>
                 <div class="campo">
                     <label>VENTA DÍA (AUTO):</label>
@@ -101,8 +101,10 @@
     <div id="mensaje">Conectando con Google Sheets para traer saldos...</div>
 </div>
 
+
+
 <script>
-    const URL_GOOGLE_SCRIPT = "https://script.google.com/macros/s/AKfycbzubkEM0TF2EWtv9n81gO2kZVSP8O2_wHOU1arh3uRBrYzOPzS6o1QaR_h5pz3oaJWqAQ/exec";
+    const URL_GOOGLE_SCRIPT = "https://google.com";
     const LIMITE_LOTE = 600; 
     let acumuladoBaseSheets = 0; 
 
@@ -120,9 +122,9 @@
         fetch(URL_GOOGLE_SCRIPT)
         .then(res => res.json())
         .then(datos => {
-            pQuedo.value = datos.pollo_anterior;
-            aQuedo.value = datos.alitas_anterior;
-            acumuladoBaseSheets = datos.acumulado_historico; 
+            pQuedo.value = datos.pollo_anterior !== undefined ? datos.pollo_anterior : 0;
+            aQuedo.value = datos.alitas_anterior !== undefined ? datos.alitas_anterior : 0;
+            acumuladoBaseSheets = datos.acumulado_historico || 0; 
             mensajeDiv.style.color = "#27ae60";
             mensajeDiv.textContent = "Saldos y acumulados del lote cargados correctamente.";
             calcularFormulario();
@@ -136,18 +138,18 @@
     });
 
     function calcularFormulario() {
-        const vPQuedo = parseFloat(pQuedo.value) || 0;
-        const vPEntro = parseFloat(pEntro.value) || 0; 
-        const vPQueda = parseFloat(pQueda.value) || 0;
+        const vPQuedo = parseFloat(pQuedo.value) === 0 ? 0 : (parseFloat(pQuedo.value) || 0);
+        const vPEntro = parseFloat(pEntro.value) === 0 ? 0 : (parseFloat(pEntro.value) || 0); 
+        const vPQueda = parseFloat(pQueda.value) === 0 ? 0 : (parseFloat(pQueda.value) || 0);
         
         const vPTotal = vPQuedo + vPEntro;
         pTotal.value = vPTotal;
         const vPVenta = vPTotal - vPQueda;
         pVenta.value = vPVenta >= 0 ? vPVenta : 0;
 
-        const vAQuedo = parseFloat(aQuedo.value) || 0;
-        const vAEntro = parseFloat(aEntro.value) || 0;
-        const vAQueda = parseFloat(aQueda.value) || 0;
+        const vAQuedo = parseFloat(aQuedo.value) === 0 ? 0 : (parseFloat(aQuedo.value) || 0);
+        const vAEntro = parseFloat(aEntro.value) === 0 ? 0 : (parseFloat(aEntro.value) || 0);
+        const vAQueda = parseFloat(aQueda.value) === 0 ? 0 : (parseFloat(aQueda.value) || 0);
         
         const vATotal = vAQuedo + vAEntro;
         aTotal.value = vATotal;
@@ -208,4 +210,3 @@
 </script>
 </body>
 </html>
-
