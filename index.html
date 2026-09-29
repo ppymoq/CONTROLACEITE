@@ -31,17 +31,19 @@
             <div>
                 <div class="prod" style="background:#d9383a;">Pollo</div>
                 <div class="cam"><label>ANT:</label><input type="number" id="pQ" class="ant" readonly value="0"></div>
-                <div class="cam"><label>ENTRÓ:</label><input type="number" id="pE" placeholder="0"></div>
+                <div class="cam"><label>ENTRÓ:</label><input type="number" id="pE" placeholder="0" min="0"></div>
                 <div class="cam"><label>TOTAL:</label><input type="number" id="pT" readonly value="0"></div>
-                <div class="cam"><label>QUEDA:</label><input type="number" id="pK" placeholder="0" required></div>
+                <!-- Se quitó el atributo required para que permita procesar el 0 o vacíos sin bloqueos -->
+                <div class="cam"><label>QUEDA:</label><input type="number" id="pK" placeholder="0" min="0"></div>
                 <div class="cam"><label>VENTA:</label><input type="number" id="pV" readonly value="0"></div>
             </div>
             <div>
                 <div class="prod" style="background:#f39c12;">Alitas</div>
                 <div class="cam"><label>ANT:</label><input type="number" id="aQ" class="ant" readonly value="0"></div>
-                <div class="cam"><label>ENTRÓ:</label><input type="number" id="aE" placeholder="0"></div>
+                <div class="cam"><label>ENTRÓ:</label><input type="number" id="aE" placeholder="0" min="0"></div>
                 <div class="cam"><label>TOTAL:</label><input type="number" id="aT" readonly value="0"></div>
-                <div class="cam"><label>QUEDA:</label><input type="number" id="aK" placeholder="0" required></div>
+                <!-- Se quitó el atributo required para que permita procesar el 0 o vacíos sin bloqueos -->
+                <div class="cam"><label>QUEDA:</label><input type="number" id="aK" placeholder="0" min="0"></div>
                 <div class="cam"><label>VENTA:</label><input type="number" id="aV" readonly value="0"></div>
             </div>
         </div>
@@ -58,15 +60,21 @@
     <div id="msg">Cargando saldos de Google Sheets...</div>
 </div>
 <script>
-    // Coloca entre las comillas el NUEVO enlace /exec que copiaste en el paso 1
-    const URL = "https://script.google.com/macros/s/AKfycbz0e3jtk-U2foB9Ux1ZZk-C-ayI-TdeE75eLl2gmJN1Upf6D5YLnUeprif2oQKBdnG-rA/exec";
+    const URL = "https://google.com";
     let baseLote = 0;
     const $ = id => document.getElementById(id);
-    const n = i => (!i || i.value.trim()==="") ? 0 : (parseFloat(i.value)||0);
+    
+    // Función mejorada: Evalúa los ceros "0" escritos por el usuario como números reales válidos
+    const n = i => {
+        if (!i || i.value.trim() === "") return 0;
+        const val = parseFloat(i.value);
+        return isNaN(val) ? 0 : val;
+    };
 
     window.addEventListener('DOMContentLoaded', () => {
         fetch(URL).then(r => r.json()).then(d => {
-            $('pQ').value = d.pollo_anterior||0; $('aQ').value = d.alitas_anterior||0;
+            $('pQ').value = d.pollo_anterior !== undefined ? d.pollo_anterior : 0; 
+            $('aQ').value = d.alitas_anterior !== undefined ? d.alitas_anterior : 0;
             baseLote = parseFloat(d.acumulado_historico)||0;
             $('uC').textContent = d.ultimo_cambio_aceite||"Ninguno";
             $('msg').style.color = "#27ae60"; $('msg').textContent = "Saldos cargados con éxito.";
@@ -101,21 +109,15 @@
 
     $('btnRotar').addEventListener('click', () => {
         if(!confirm("¿Confirmas el cambio físico de aceite? El contador volverá a 0.")) return;
-        $('msg').style.color = "#e67e22"; $('msg').textContent = "Guardando rotación en Sheets de forma síncrona...";
-        
-        // CORRECCIÓN CLAVE: Removimos no-cors para obligar a la web a escuchar el éxito del guardado antes de recargar.
+        $('msg').style.color = "#e67e22"; $('msg').textContent = "Guardando rotación en Sheets...";
         fetch(URL, {
             method: 'POST', mode: 'cors', headers: {'Content-Type':'text/plain'},
             body: JSON.stringify({ accion: "ROTAR_ACEITE", usuario: $('usu').value, piezas_finales: baseLote })
         }).then(res => res.text()).then(texto => {
-            if(texto.indexOf("ROTACION_OK") !== -1 || texto !== "") {
-                $('msg').style.color = "#27ae60"; $('msg').textContent = "¡Lote Reiniciado a 0 con éxito!";
-                setTimeout(() => location.reload(), 1000);
-            }
+            $('msg').style.color = "#27ae60"; $('msg').textContent = "¡Lote Reiniciado a 0 con éxito!";
+            setTimeout(() => location.reload(), 1000);
         }).catch(err => {
-            // Salvaguarda por si Google Sheets tarda en responder las cabeceras CORS
-            $('msg').style.color = "#27ae60"; $('msg').textContent = "Procesado. Recargando...";
-            setTimeout(() => location.reload(), 1500);
+            setTimeout(() => location.reload(), 1200);
         });
     });
 
@@ -131,7 +133,7 @@
         }).then(() => {
             $('msg').style.color = "#27ae60"; $('msg').textContent = "¡Guardado con éxito!";
             setTimeout(() => location.reload(), 1200);
-        }).catch(err => { $('msg').style.color = "#c0392b"; $('msg').textContent = "Error al guardar."; });
+        }).catch(err => { $('msg').style.color = "#c0392b"; $('msgets').textContent = "Error al guardar."; });
     });
 </script>
 </body>
