@@ -127,10 +127,11 @@
 
     document.getElementById('fVentas').addEventListener('submit', e => {
         e.preventDefault();
-        document.getElementById('msg').textContent = "Guardando reporte diario...";
+        document.getElementById('msg').textContent = "Guardando reporte diario (MOQUEGUA)...";
         fetch(URL, {
             method: 'POST', mode: 'no-cors', headers: {'Content-Type':'application/json'},
             body: JSON.stringify({
+                local: "moquegua", // 👈 Esto le dice a Google que guarde en MOQUEGUA
                 usuario: document.getElementById('usu').value, 
                 pollo_quedo: n(pQ), pollo_entro: n(pE), pollo_total: n(pT), pollo_venta: n(pV), pollo_queda: n(pK),
                 alitas_quedo: n(aQ), alitas_entro: n(aE), alitas_total: n(aT), alitas_venta: n(aV), alitas_queda: n(aK)
@@ -143,3 +144,4 @@
 </script>
 </body>
 </html>
+
