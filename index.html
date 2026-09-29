@@ -3,52 +3,68 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Inventario Corto</title>
+    <title>Inventario</title>
+    <style>
+        body { font-family: sans-serif; background: #f4f6f9; padding: 10px; max-width: 600px; margin: auto; color: #333; }
+        .box { background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+        h2 { color: #d9383a; text-align: center; margin: 0 0 15px 0; font-size: 18px; text-transform: uppercase; }
+        .fech { background: #eef2f7; border: 1px solid #d0d7de; text-align: center; padding: 8px; font-weight: bold; border-radius: 4px; margin-bottom: 15px; font-size: 13px; }
+        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+        .prod { color: white; text-align: center; padding: 5px; font-weight: bold; border-radius: 4px; margin-bottom: 10px; font-size: 13px; text-transform: uppercase; }
+        .cam { margin-bottom: 8px; }
+        label { display: block; font-size: 10px; font-weight: bold; color: #555; }
+        input { width: 100%; padding: 8px; box-sizing: border-box; border: 1px solid #ccc; border-radius: 4px; font-size: 14px; }
+        input[readonly] { background: #e9f7ef; color: #196f3d; font-weight: bold; border-color: #a3e4d7; }
+        input[readonly].ant { background: #f2f2f2; color: #666; border-color: #ccc; }
+        .inf { margin-top: 15px; background: #e8f8f5; border: 1px solid #a3e4d7; padding: 12px; border-radius: 6px; color: #117a65; font-size: 13px; font-weight: 600; }
+        .inf.rojo { background: #fadbd8; border-color: #f5b7b1; color: #922b21; }
+        button { background: #d9383a; color: white; border: none; padding: 12px; width: 100%; cursor: pointer; font-size: 15px; font-weight: bold; border-radius: 4px; margin-top: 15px; text-transform: uppercase; }
+        button:hover { background: #bc2f31; }
+        #btnRotar { background: #e67e22 !important; display: none; }
+        #msg { margin-top: 10px; text-align: center; font-size: 12px; font-weight: bold; color: #7f8c8d; }
+    </style>
 </head>
 <body>
-<div>
+<div class="box">
     <h2>Control Diario de Inventario</h2>
-    <div id="fechaVisor" style="font-weight:bold; margin-bottom:10px;">Cargando fecha...</div>
+    <div id="fechaVisor" class="fech">Cargando fecha...</div>
     <form id="fVentas">
-        <div>BROASTERO: <input type="text" id="usu" value="GUSTAVO" required></div>
-        <hr>
-        <h3>Pollo</h3>
-        ANT: <input type="number" id="pQ" readonly value="0"><br>
-        ENTRÓ: <input type="number" id="pE" placeholder="0"><br>
-        TOTAL: <input type="number" id="pT" readonly value="0"><br>
-        QUEDA: <input type="number" id="pK" placeholder="0"><br>
-        VENTA: <input type="number" id="pV" readonly value="0">
-        <hr>
-        <h3>Alitas</h3>
-        ANT: <input type="number" id="aQ" readonly value="0"><br>
-        ENTRÓ: <input type="number" id="aE" placeholder="0"><br>
-        TOTAL: <input type="number" id="aT" readonly value="0"><br>
-        QUEDA: <input type="number" id="aK" placeholder="0"><br>
-        VENTA: <input type="number" id="aV" readonly value="0">
-        <hr>
-        <div id="card" style="background:#eee; padding:10px; margin-top:10px;">
-            <div id="st" style="font-weight:bold;">REGISTRO OK</div>
-            Piezas hoy: <span id="tH">0</span><br>
-            Acumulado Lote: <span id="tL">0</span> / 600<br>
-            Quedan aprox: <span id="tR">600</span><br>
-            Lote actual: <span id="uC">-</span>
+        <div class="cam"><label>BROASTERO:</label><input type="text" id="usu" value="GUSTAVO" required></div>
+        <div class="grid">
+            <div>
+                <div class="prod" style="background:#d9383a;">Pollo</div>
+                <div class="cam"><label>ANT:</label><input type="number" id="pQ" class="ant" readonly value="0"></div>
+                <div class="cam"><label>ENTRÓ:</label><input type="number" id="pE" placeholder="0"></div>
+                <div class="cam"><label>TOTAL:</label><input type="number" id="pT" readonly value="0"></div>
+                <div class="cam"><label>QUEDA:</label><input type="number" id="pK" placeholder="0"></div>
+                <div class="cam"><label>VENTA:</label><input type="number" id="pV" readonly value="0"></div>
+            </div>
+            <div>
+                <div class="prod" style="background:#f39c12;">Alitas</div>
+                <div class="cam"><label>ANT:</label><input type="number" id="aQ" class="ant" readonly value="0"></div>
+                <div class="cam"><label>ENTRÓ:</label><input type="number" id="aE" placeholder="0"></div>
+                <div class="cam"><label>TOTAL:</label><input type="number" id="aT" readonly value="0"></div>
+                <div class="cam"><label>QUEDA:</label><input type="number" id="aK" placeholder="0"></div>
+                <div class="cam"><label>VENTA:</label><input type="number" id="aV" readonly value="0"></div>
+            </div>
         </div>
-        <button type="button" id="btnRotar" style="background:orange; display:none; margin-top:10px; padding:10px;">🔄 REGISTRAR CAMBIO DE ACEITE</button>
-        <br>
-        <button type="submit" style="background:red; color:white; padding:10px; margin-top:10px;">Procesar Registro Diario</button>
+        <div id="card" class="inf">
+            <div id="st" style="text-align:center;margin-bottom:5px;font-size:14px;">✅ REGISTRO OK</div>
+            • Piezas hoy: <span id="tH">0</span><br>
+            • Acumulado Lote Aceite: <span id="tL">0</span> / 600<br>
+            • Quedan aprox: <span id="tR">600</span><br>
+            <small style="display:block;margin-top:4px;font-weight:normal;opacity:0.8;">Estado: <span id="uC">-</span></small>
+        </div>
+        <button type="button" id="btnRotar">🔄 REGISTRAR CAMBIO DE ACEITE</button>
+        <button type="submit">Procesar Registro Diario</button>
     </form>
-    <div id="msg" style="font-weight:bold; margin-top:10px;">Conectando...</div>
+    <div id="msg">Cargando saldos de Google Sheets...</div>
 </div>
 
 <script>
     const URL = "https://script.google.com/macros/s/AKfycbz04_xB_sSAa_8MyWWjqe7JC9PVa0zpMySOuQ2RWS2_lWHeFrnpggBuQbeAqWrAbCDb/exec";
     let baseLote = 0;
-
-    function n(el) {
-        if (!el || el.value.trim() === "") return 0;
-        const val = parseFloat(el.value);
-        return isNaN(val) ? 0 : val;
-    }
+    const n = el => (!el || el.value.trim() === "") ? 0 : (parseFloat(el.value)||0);
 
     function mostrarFechaActual() {
         const dias = ["Domingo", "Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado"];
@@ -73,10 +89,8 @@
         const pQ = document.getElementById('pQ'), pE = document.getElementById('pE'), pT = document.getElementById('pT'), pK = document.getElementById('pK'), pV = document.getElementById('pV');
         const aQ = document.getElementById('aQ'), aE = document.getElementById('aE'), aT = document.getElementById('aT'), aK = document.getElementById('aK'), aV = document.getElementById('aV');
 
-        pT.value = n(pQ) + n(pE);
-        pV.value = Math.max(0, n(pT) - n(pK));
-        aT.value = n(aQ) + n(aE);
-        aV.value = Math.max(0, n(aT) - n(aK));
+        pT.value = n(pQ) + n(pE); pV.value = Math.max(0, n(pT) - n(pK));
+        aT.value = n(aQ) + n(aE); aV.value = Math.max(0, n(aT) - n(aK));
 
         const hoy = n(pV) + (n(aV) / 3);
         const tot = baseLote + hoy;
@@ -87,18 +101,17 @@
         document.getElementById('tR').textContent = res.toFixed(1);
 
         if (tot >= 600) {
+            document.getElementById('card').className = 'inf rojo';
             document.getElementById('st').textContent = "⚠️ ROTAR LOTE (CAMBIAR ACEITE)";
             document.getElementById('btnRotar').style.display = 'block';
         } else {
+            document.getElementById('card').className = 'inf';
             document.getElementById('st').textContent = "✅ REGISTRO OK";
             document.getElementById('btnRotar').style.display = 'none';
         }
     }
 
-    document.getElementById('pE').addEventListener('input', calc);
-    document.getElementById('pK').addEventListener('input', calc);
-    document.getElementById('aE').addEventListener('input', calc);
-    document.getElementById('aK').addEventListener('input', calc);
+    ['pE','pK','aE','aK'].forEach(id => document.getElementById(id).addEventListener('input', calc));
 
     document.getElementById('btnRotar').addEventListener('click', () => {
         if(!confirm("¿Confirmas el cambio físico de aceite?")) return;
@@ -107,7 +120,7 @@
             method: 'POST', mode: 'cors', headers: {'Content-Type':'text/plain'},
             body: JSON.stringify({ accion: "ROTAR_ACEITE", usuario: document.getElementById('usu').value, piezas_finales: baseLote })
         }).then(() => {
-            document.getElementById('msg').textContent = "¡Lote cerrado!";
+            document.getElementById('msg').textContent = "¡Lote cerrado con éxito!";
             setTimeout(() => location.reload(), 1000);
         }).catch(() => setTimeout(() => location.reload(), 1200));
     });
@@ -119,8 +132,8 @@
             method: 'POST', mode: 'no-cors', headers: {'Content-Type':'application/json'},
             body: JSON.stringify({
                 usuario: document.getElementById('usu').value, 
-                pollo_quedo: n(document.getElementById('pQ')), pollo_entro: n(document.getElementById('pE')), pollo_total: n(document.getElementById('pT')), pollo_venta: n(document.getElementById('pV')), pollo_queda: n(document.getElementById('pK')),
-                alitas_quedo: n(document.getElementById('aQ')), alitas_entro: n(document.getElementById('aE')), alitas_total: n(document.getElementById('aT')), alitas_venta: n(document.getElementById('aV')), alitas_queda: n(document.getElementById('aK'))
+                pollo_quedo: n(pQ), pollo_entro: n(pE), pollo_total: n(pT), pollo_venta: n(pV), pollo_queda: n(pK),
+                alitas_quedo: n(aQ), alitas_entro: n(aE), alitas_total: n(aT), alitas_venta: n(aV), alitas_queda: n(aK)
             })
         }).then(() => {
             document.getElementById('msg').textContent = "¡Guardado con éxito!";
@@ -130,4 +143,3 @@
 </script>
 </body>
 </html>
-
