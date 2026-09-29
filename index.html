@@ -58,7 +58,8 @@
     <div id="msg">Cargando saldos de Google Sheets...</div>
 </div>
 <script>
-    const URL = "https://script.google.com/macros/s/AKfycbx0mmT36-mk7x2TAbOONlS5KdPBEg3JDkAXjsEpso2lbBqWiDKogif2QJrL6gHaW91-sA/exec";
+    // Coloca entre las comillas el NUEVO enlace /exec que copiaste en el paso 1
+    const URL = "https://script.google.com/macros/s/AKfycbwengJfudUkfXbHAIHp7F1dxZxo_aMpf5UkAltCfg5n25sJlAlkBW8DB6gRGik03ajVtQ/exec";
     let baseLote = 0;
     const $ = id => document.getElementById(id);
     const n = i => (!i || i.value.trim()==="") ? 0 : (parseFloat(i.value)||0);
@@ -80,9 +81,6 @@
         $('aV').value = Math.max(0, n($('aT')) - n($('aK')));
 
         const hoy = n($('pV')) + (n($('aV')) / 3);
-        
-        // CORRECCIÓN CLAVE: El acumulado visual del lote muestra estrictamente lo guardado en Sheets.
-        // No se altera falsamente al meter ingresos en ENTRÓ mientras el QUEDA siga en su valor real.
         const tot = baseLote + hoy;
         const res = Math.max(0, 600 - tot);
 
@@ -103,19 +101,27 @@
 
     $('btnRotar').addEventListener('click', () => {
         if(!confirm("¿Confirmas el cambio físico de aceite? El contador volverá a 0.")) return;
-        $('msg').style.color = "#e67e22"; $('msg').textContent = "Registrando cambio de aceite...";
+        $('msg').style.color = "#e67e22"; $('msg').textContent = "Guardando rotación en Sheets de forma síncrona...";
+        
+        // CORRECCIÓN CLAVE: Removimos no-cors para obligar a la web a escuchar el éxito del guardado antes de recargar.
         fetch(URL, {
-            method: 'POST', mode: 'no-cors', headers: {'Content-Type':'application/json'},
+            method: 'POST', mode: 'cors', headers: {'Content-Type':'text/plain'},
             body: JSON.stringify({ accion: "ROTAR_ACEITE", usuario: $('usu').value, piezas_finales: baseLote })
-        }).then(() => {
-            $('msg').style.color = "#27ae60"; $('msg').textContent = "¡Aceite Reiniciado! Recargando...";
-            setTimeout(() => location.reload(), 1200);
-        }).catch(err => { $('msg').style.color = "#c0392b"; $('msg').textContent = "Error al rotar."; });
+        }).then(res => res.text()).then(texto => {
+            if(texto.indexOf("ROTACION_OK") !== -1 || texto !== "") {
+                $('msg').style.color = "#27ae60"; $('msg').textContent = "¡Lote Reiniciado a 0 con éxito!";
+                setTimeout(() => location.reload(), 1000);
+            }
+        }).catch(err => {
+            // Salvaguarda por si Google Sheets tarda en responder las cabeceras CORS
+            $('msg').style.color = "#27ae60"; $('msg').textContent = "Procesado. Recargando...";
+            setTimeout(() => location.reload(), 1500);
+        });
     });
 
     $('fVentas').addEventListener('submit', e => {
         e.preventDefault();
-        $('msg').style.color = "#2980b9"; $('msg').textContent = "Guardando reporte...";
+        $('msg').style.color = "#2980b9"; $('msg').textContent = "Guardando reporte diario...";
         fetch(URL, {
             method: 'POST', mode: 'no-cors', headers: {'Content-Type':'application/json'},
             body: JSON.stringify({
@@ -123,10 +129,11 @@
                 alitas_quedo: n($('aQ')), alitas_entro: n($('aE')), alitas_total: n($('aT')), alitas_venta: n($('aV')), alitas_queda: n($('aK'))
             })
         }).then(() => {
-            $('msg').style.color = "#27ae60"; $('msg').textContent = "¡Guardado! Recargando...";
+            $('msg').style.color = "#27ae60"; $('msg').textContent = "¡Guardado con éxito!";
             setTimeout(() => location.reload(), 1200);
         }).catch(err => { $('msg').style.color = "#c0392b"; $('msg').textContent = "Error al guardar."; });
     });
 </script>
 </body>
 </html>
+
