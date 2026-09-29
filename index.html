@@ -26,27 +26,24 @@
 <body>
 <div class="box">
     <h2>Control Diario de Inventario</h2>
-    
-    <!-- NUEVO RECUADRO VISUAL DE FECHA CON EL DÍA DE LA SEMANA -->
     <div id="fechaVisor" class="fecha-sistema">Cargando fecha actual...</div>
-
     <form id="fVentas">
         <div class="cam"><label>BROASTERO:</label><input type="text" id="usu" value="GUSTAVO" required></div>
         <div class="grid">
             <div>
                 <div class="prod" style="background:#d9383a;">Pollo</div>
                 <div class="cam"><label>ANT:</label><input type="number" id="pQ" class="ant" readonly value="0"></div>
-                <div class="cam"><label>ENTRÓ:</label><input type="number" id="pE" placeholder="0" min="0"></div>
+                <div class="cam"><label>ENTRÓ:</label><input type="number" id="pE" placeholder="0"></div>
                 <div class="cam"><label>TOTAL:</label><input type="number" id="pT" readonly value="0"></div>
-                <div class="cam"><label>QUEDA:</label><input type="number" id="pK" placeholder="0" min="0"></div>
+                <div class="cam"><label>QUEDA:</label><input type="number" id="pK" placeholder="0"></div>
                 <div class="cam"><label>VENTA:</label><input type="number" id="pV" readonly value="0"></div>
             </div>
             <div>
                 <div class="prod" style="background:#f39c12;">Alitas</div>
                 <div class="cam"><label>ANT:</label><input type="number" id="aQ" class="ant" readonly value="0"></div>
-                <div class="cam"><label>ENTRÓ:</label><input type="number" id="aE" placeholder="0" min="0"></div>
+                <div class="cam"><label>ENTRÓ:</label><input type="number" id="aE" placeholder="0"></div>
                 <div class="cam"><label>TOTAL:</label><input type="number" id="aT" readonly value="0"></div>
-                <div class="cam"><label>QUEDA:</label><input type="number" id="aK" placeholder="0" min="0"></div>
+                <div class="cam"><label>QUEDA:</label><input type="number" id="aK" placeholder="0"></div>
                 <div class="cam"><label>VENTA:</label><input type="number" id="aV" readonly value="0"></div>
             </div>
         </div>
@@ -62,27 +59,21 @@
     </form>
     <div id="msg">Cargando saldos de Google Sheets...</div>
 </div>
+
 <script>
-    // REEMPLAZA ESTA URL CON TU ENLACE /exec ACTIVO DE GOOGLE SCRIPT
     const URL = "https://script.google.com/macros/s/AKfycbz04_xB_sSAa_8MyWWjqe7JC9PVa0zpMySOuQ2RWS2_lWHeFrnpggBuQbeAqWrAbCDb/exec";
     let baseLote = 0;
     const \$ = id => document.getElementById(id);
     const n = i => (!i || i.value.trim()==="") ? 0 : (parseFloat(i.value)||0);
 
-    // FUNCIÓN PARA MOSTRAR LA FECHA COMPLETA Y EL DÍA EN ESPAÑOL
     function mostrarFechaActual() {
-        const diasSemana = ["Domingo", "Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado"];
+        const dias = ["Domingo", "Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado"];
         const ahora = new Date();
-        const diaNombre = diasSemana[ahora.getDay()];
-        const diaNum = String(ahora.getDate()).padStart(2, '0');
-        const mesNum = String(ahora.getMonth() + 1).padStart(2, '0');
-        const anio = ahora.getFullYear();
-        
-        \$('fechaVisor').textContent = `📅 ${diaNombre} ${diaNum}/${mesNum}/${anio}`;
+        \$('fechaVisor').textContent = `📅 ${dias[ahora.getDay()]} ${String(ahora.getDate()).padStart(2,'0')}/${String(ahora.getMonth()+1).padStart(2,'0')}/${ahora.getFullYear()}`;
     }
 
     window.addEventListener('DOMContentLoaded', () => {
-        mostrarFechaActual(); // Inicializa el visor de fecha
+        mostrarFechaActual();
         fetch(URL).then(r => r.json()).then(d => {
             \$('pQ').value = d.pollo_anterior!==undefined?d.pollo_anterior:0; 
             \$('aQ').value = d.alitas_anterior!==undefined?d.alitas_anterior:0;
@@ -90,14 +81,14 @@
             \$('uC').textContent = d.ultimo_cambio_aceite||"Lote 1";
             \(('msg').style.color = "#27ae60"; \)('msg').textContent = "Saldos cargados con éxito.";
             calc();
-        }).catch(e => { \$('msg').textContent = "Listo para iniciar registro."; calc(); });
+        }).catch(e => { \$('msg').textContent = "Listo para registrar."; calc(); });
     });
 
     function calc() {
-        ('pT').value = n(('pQ')) + n(\(('pE'));\)('pV').value = Math.max(0, n(('pT')) - n(('pK')));
-        ('aT').value = n(('aQ')) + n(\(('aE'));\)('aV').value = Math.max(0, n(('aT')) - n(('aK')));
+        \(('pT').value = n(\)('pQ')) + n(\(('pE'));\)('pV').value = Math.max(0, n(\(('pT')) - n(\)('pK')));
+        \(('aT').value = n(\)('aQ')) + n(\(('aE'));\)('aV').value = Math.max(0, n(\(('aT')) - n(\)('aK')));
 
-        const hoy = n(('pV')) + (n(('aV')) / 3);
+        const hoy = n(\(('pV')) + (n(\)('aV')) / 3);
         const tot = baseLote + hoy;
         const res = Math.max(0, 600 - tot);
 
@@ -105,10 +96,10 @@
         \(('tL').textContent = tot.toFixed(1);\)('tR').textContent = res.toFixed(1);
 
         if (tot >= 600) {
-            ('card').className = 'inf rojo'; ('st').textContent = "⚠️ ROTAR LOTE";
+            \(('card').className = 'inf rojo';\)('st').textContent = "⚠️ ROTAR LOTE";
             \$('btnRotar').style.display = 'block';
         } else {
-            ('card').className = 'inf'; ('st').textContent = "✅ REGISTRO OK";
+            \(('card').className = 'inf';\)('st').textContent = "✅ REGISTRO OK";
             \$('btnRotar').style.display = 'none';
         }
     }
@@ -116,17 +107,15 @@
     ['pE','pK','aE','aK'].forEach(id => \$(id).addEventListener('input', calc));
 
     \$('btnRotar').addEventListener('click', () => {
-        if(!confirm("¿Confirmas el cambio físico de aceite? El lote avanzará en Sheets y el contador web volverá a 0.")) return;
-        \(('msg').style.color = "#e67e22"; \)('msg').textContent = "Actualizando número de lote en Google Sheets...";
+        if(!confirm("¿Confirmas el cambio físico de aceite?")) return;
+        \(('msg').style.color = "#e67e22"; \)('msg').textContent = "Guardando rotación...";
         fetch(URL, {
             method: 'POST', mode: 'cors', headers: {'Content-Type':'text/plain'},
             body: JSON.stringify({ accion: "ROTAR_ACEITE", usuario: \$('usu').value, piezas_finales: baseLote })
-        }).then(res => res.text()).then(() => {
+        }).then(() => {
             \(('msg').style.color = "#27ae60"; \)('msg').textContent = "¡Lote cerrado con éxito!";
             setTimeout(() => location.reload(), 1000);
-        }).catch(err => {
-            setTimeout(() => location.reload(), 1200);
-        });
+        }).catch(() => setTimeout(() => location.reload(), 1200));
     });
 
     \$('fVentas').addEventListener('submit', e => {
@@ -141,7 +130,7 @@
         }).then(() => {
             \(('msg').style.color = "#27ae60"; \)('msg').textContent = "¡Guardado con éxito!";
             setTimeout(() => location.reload(), 1200);
-        }).catch(err => { \(('msg').style.color = "#c0392b"; \)('msg').textContent = "Error al guardar."; });
+        }).catch(() => { \(('msg').style.color = "#c0392b"; \)('msg').textContent = "Error al guardar."; });
     });
 </script>
 </body>
