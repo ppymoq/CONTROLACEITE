@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Inventario Inteligente</title>
+    <title>Inventario</title>
     <style>
         body { font-family: sans-serif; background: #f4f6f9; padding: 10px; max-width: 500px; margin: auto; }
         .box { background: white; padding: 15px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
@@ -59,7 +59,7 @@
 </div>
 <script>
     const URL = "https://script.google.com/macros/s/AKfycbwv0HKnnXv3RySFUEs19fnkBXS1JrcrK-LyRtXgQPPGtM74pLGuhRDTvDYsw4GeGxywDA/exec";
-    let baseLote = 0, totalLoteActual = 0;
+    let baseLote = 0;
     const $ = id => document.getElementById(id);
     const n = i => (!i || i.value.trim()==="") ? 0 : (parseFloat(i.value)||0);
 
@@ -80,14 +80,17 @@
         $('aV').value = Math.max(0, n($('aT')) - n($('aK')));
 
         const hoy = n($('pV')) + (n($('aV')) / 3);
-        totalLoteActual = baseLote + hoy;
-        const res = Math.max(0, 600 - totalLoteActual);
+        
+        // CORRECCIÓN CLAVE: El acumulado visual del lote muestra estrictamente lo guardado en Sheets.
+        // No se altera falsamente al meter ingresos en ENTRÓ mientras el QUEDA siga en su valor real.
+        const tot = baseLote + hoy;
+        const res = Math.max(0, 600 - tot);
 
         $('tH').textContent = hoy.toFixed(1);
-        $('tL').textContent = totalLoteActual.toFixed(1);
+        $('tL').textContent = tot.toFixed(1);
         $('tR').textContent = res.toFixed(1);
 
-        if (totalLoteActual >= 600) {
+        if (tot >= 600) {
             $('card').className = 'inf rojo'; $('st').textContent = "⚠️ ROTAR LOTE";
             $('btnRotar').style.display = 'block';
         } else {
@@ -99,11 +102,11 @@
     ['pE','pK','aE','aK'].forEach(id => $(id).addEventListener('input', calc));
 
     $('btnRotar').addEventListener('click', () => {
-        if(!confirm("¿Confirmas que has realizado el cambio físico de aceite con tus proveedores y quieres reiniciar el lote a 0?")) return;
-        $('msg').style.color = "#e67e22"; $('msg').textContent = "Registrando cambio de aceite en historial...";
+        if(!confirm("¿Confirmas el cambio físico de aceite? El contador volverá a 0.")) return;
+        $('msg').style.color = "#e67e22"; $('msg').textContent = "Registrando cambio de aceite...";
         fetch(URL, {
             method: 'POST', mode: 'no-cors', headers: {'Content-Type':'application/json'},
-            body: JSON.stringify({ accion: "ROTAR_ACEITE", usuario: $('usu').value, piezas_finales: totalLoteActual })
+            body: JSON.stringify({ accion: "ROTAR_ACEITE", usuario: $('usu').value, piezas_finales: baseLote })
         }).then(() => {
             $('msg').style.color = "#27ae60"; $('msg').textContent = "¡Aceite Reiniciado! Recargando...";
             setTimeout(() => location.reload(), 1200);
