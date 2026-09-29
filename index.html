@@ -33,7 +33,6 @@
                 <div class="cam"><label>ANT:</label><input type="number" id="pQ" class="ant" readonly value="0"></div>
                 <div class="cam"><label>ENTRÓ:</label><input type="number" id="pE" placeholder="0" min="0"></div>
                 <div class="cam"><label>TOTAL:</label><input type="number" id="pT" readonly value="0"></div>
-                <!-- Se quitó el atributo required para que permita procesar el 0 o vacíos sin bloqueos -->
                 <div class="cam"><label>QUEDA:</label><input type="number" id="pK" placeholder="0" min="0"></div>
                 <div class="cam"><label>VENTA:</label><input type="number" id="pV" readonly value="0"></div>
             </div>
@@ -42,7 +41,6 @@
                 <div class="cam"><label>ANT:</label><input type="number" id="aQ" class="ant" readonly value="0"></div>
                 <div class="cam"><label>ENTRÓ:</label><input type="number" id="aE" placeholder="0" min="0"></div>
                 <div class="cam"><label>TOTAL:</label><input type="number" id="aT" readonly value="0"></div>
-                <!-- Se quitó el atributo required para que permita procesar el 0 o vacíos sin bloqueos -->
                 <div class="cam"><label>QUEDA:</label><input type="number" id="aK" placeholder="0" min="0"></div>
                 <div class="cam"><label>VENTA:</label><input type="number" id="aV" readonly value="0"></div>
             </div>
@@ -52,7 +50,7 @@
             • Piezas hoy: <span id="tH">0</span><br>
             • Acumulado Lote Aceite: <span id="tL">0</span> / 600<br>
             • Quedan aprox: <span id="tR">600</span><br>
-            <small style="display:block;margin-top:5px;font-weight:normal;opacity:0.8;">Último cambio: <span id="uC">-</span></small>
+            <small style="display:block;margin-top:5px;font-weight:normal;opacity:0.8;">Estado actual: <span id="uC">-</span></small>
         </div>
         <button type="button" id="btnRotar" class="btn-rotar">🔄 REGISTRAR CAMBIO DE ACEITE</button>
         <button type="submit" id="btnGuardar">Procesar Registro Diario</button>
@@ -60,26 +58,21 @@
     <div id="msg">Cargando saldos de Google Sheets...</div>
 </div>
 <script>
-    const URL = "https://script.google.com/macros/s/AKfycbz0e3jtk-U2foB9Ux1ZZk-C-ayI-TdeE75eLl2gmJN1Upf6D5YLnUeprif2oQKBdnG-rA/exec";
+    // REEMPLAZA ESTA URL CON TU NUEVO ENLACE /exec DEL PASO 1
+    const URL = "https://script.google.com/macros/s/AKfycbz04_xB_sSAa_8MyWWjqe7JC9PVa0zpMySOuQ2RWS2_lWHeFrnpggBuQbeAqWrAbCDb/exec";
     let baseLote = 0;
     const $ = id => document.getElementById(id);
-    
-    // Función mejorada: Evalúa los ceros "0" escritos por el usuario como números reales válidos
-    const n = i => {
-        if (!i || i.value.trim() === "") return 0;
-        const val = parseFloat(i.value);
-        return isNaN(val) ? 0 : val;
-    };
+    const n = i => (!i || i.value.trim()==="") ? 0 : (parseFloat(i.value)||0);
 
     window.addEventListener('DOMContentLoaded', () => {
         fetch(URL).then(r => r.json()).then(d => {
-            $('pQ').value = d.pollo_anterior !== undefined ? d.pollo_anterior : 0; 
-            $('aQ').value = d.alitas_anterior !== undefined ? d.alitas_anterior : 0;
+            $('pQ').value = d.pollo_anterior!==undefined?d.pollo_anterior:0; 
+            $('aQ').value = d.alitas_anterior!==undefined?d.alitas_anterior:0;
             baseLote = parseFloat(d.acumulado_historico)||0;
-            $('uC').textContent = d.ultimo_cambio_aceite||"Ninguno";
+            $('uC').textContent = d.ultimo_cambio_aceite||"Lote 1";
             $('msg').style.color = "#27ae60"; $('msg').textContent = "Saldos cargados con éxito.";
             calc();
-        }).catch(e => { $('msg').textContent = "Listo para iniciar registro diario."; calc(); });
+        }).catch(e => { $('msg').textContent = "Listo para iniciar registro."; calc(); });
     });
 
     function calc() {
@@ -108,13 +101,13 @@
     ['pE','pK','aE','aK'].forEach(id => $(id).addEventListener('input', calc));
 
     $('btnRotar').addEventListener('click', () => {
-        if(!confirm("¿Confirmas el cambio físico de aceite? El contador volverá a 0.")) return;
-        $('msg').style.color = "#e67e22"; $('msg').textContent = "Guardando rotación en Sheets...";
+        if(!confirm("¿Confirmas el cambio físico de aceite? El lote avanzará en Sheets y el contador web volverá a 0.")) return;
+        $('msg').style.color = "#e67e22"; $('msg').textContent = "Actualizando número de lote en Google Sheets...";
         fetch(URL, {
             method: 'POST', mode: 'cors', headers: {'Content-Type':'text/plain'},
             body: JSON.stringify({ accion: "ROTAR_ACEITE", usuario: $('usu').value, piezas_finales: baseLote })
-        }).then(res => res.text()).then(texto => {
-            $('msg').style.color = "#27ae60"; $('msg').textContent = "¡Lote Reiniciado a 0 con éxito!";
+        }).then(res => res.text()).then(() => {
+            $('msg').style.color = "#27ae60"; $('msg').textContent = "¡Lote cerrado con éxito!";
             setTimeout(() => location.reload(), 1000);
         }).catch(err => {
             setTimeout(() => location.reload(), 1200);
@@ -133,9 +126,8 @@
         }).then(() => {
             $('msg').style.color = "#27ae60"; $('msg').textContent = "¡Guardado con éxito!";
             setTimeout(() => location.reload(), 1200);
-        }).catch(err => { $('msg').style.color = "#c0392b"; $('msgets').textContent = "Error al guardar."; });
+        }).catch(err => { $('msg').style.color = "#c0392b"; $('msg').textContent = "Error al guardar."; });
     });
 </script>
 </body>
 </html>
-
